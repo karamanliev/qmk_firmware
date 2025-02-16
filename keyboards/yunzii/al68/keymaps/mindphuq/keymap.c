@@ -16,13 +16,27 @@
 #include QMK_KEYBOARD_H
 
 #define CTL_ESC CTL_T(KC_ESC)
+#define MO2_LNG LT(2, KC_LNG1)
+
+#define LED_CAPS 25
+#define LED_OS 44
+#define LED_1 55
+#define LED_2 56
+#define LED_3 57
+
+#define LIN_PSCR LGUI(S(KC_S))
+#define MAC_PSCR LGUI(S(KC_4))
+#define LIN_SEL_WRD C(S(KC_LEFT))
+#define MAC_SEL_WRD A(S(KC_LEFT))
+
 enum user_keycodes {
     OS_CHG = SAFE_RANGE,
-    PRT_EM,
     PSCR,
     DEL_WRD,
-    MUL_PST
+    OSL_MEH //  TODO: make it one shot layer 1 on tap and MEH (or HYPR) on hold
 };
+
+bool is_macos_mode = false;
 
 // Call the post init code.
 void keyboard_post_init_user(void) {
@@ -38,10 +52,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
-        // case MCTL_ESC: {
-        //     CTL_T(KC_ESC)
-        //     break;
-        // }
+        case OS_CHG:
+            is_macos_mode = !is_macos_mode;
+            break;
+
+        case PSCR:
+            keycode = is_macos_mode ? MAC_PSCR : LIN_PSCR;
+            tap_code16(keycode);
+            break;
+
+        case DEL_WRD:
+            keycode = is_macos_mode ? MAC_SEL_WRD : LIN_SEL_WRD;
+            tap_code16(keycode);
+            tap_code(KC_BSPC);
+            return false;
+
+        case OSL_MEH:
+            // tap_code16()
     }
     return true;
 };
@@ -50,13 +77,13 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     // add layer indicators
     switch(get_highest_layer(layer_state|default_layer_state)) {
         case 1:
-            rgb_matrix_set_color(55, RGB_CYAN);
+            rgb_matrix_set_color(LED_1, RGB_CYAN);
             break;
         case 2:
-            rgb_matrix_set_color(56, RGB_CYAN);
+            rgb_matrix_set_color(LED_2, RGB_CYAN);
             break;
         case 3:
-            rgb_matrix_set_color(57, RGB_CYAN);
+            rgb_matrix_set_color(LED_3, RGB_CYAN);
             break;
         default:
             break;
@@ -64,9 +91,15 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     // Add indicator if caps_lock or caps_word is on
     if (host_keyboard_led_state().caps_lock || is_caps_word_on()) {
-        RGB_MATRIX_INDICATOR_SET_COLOR(25, 255, 0, 0);
+        RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 255, 0, 0);
     } else {
-        RGB_MATRIX_INDICATOR_SET_COLOR(25, 0, 0, 0);
+        RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 0, 0, 0);
+    }
+
+    if (is_macos_mode) {
+        rgb_matrix_set_color(LED_OS, 255, 0, 0);
+    } else {
+        rgb_matrix_set_color(LED_OS, 0, 0, 0);
     }
     return false;
 }
@@ -83,20 +116,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_65_ansi_blocker(
     KC_GRV,     KC_1,       KC_2,       KC_3,       KC_4,       KC_5,       KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_MINS,    KC_EQL,     KC_BSPC,    KC_MUTE,
     KC_TAB,     KC_Q,       KC_W,       KC_E,       KC_R,       KC_T,       KC_Y,       KC_U,       KC_I,       KC_O,       KC_P,       KC_LBRC,    KC_RBRC,    KC_BSLS,    KC_DELETE,
-    CTL_ESC,   KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,                KC_ENT,     KC_PAGE_UP,
+    CTL_ESC,    KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,                KC_ENT,     KC_PAGE_UP,
     KC_LSFT,    KC_Z,       KC_X,       KC_C,       KC_V,       KC_B,       KC_N,       KC_M,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_RSFT,                KC_UP,      KC_PAGE_DOWN,
-    MO(1),      KC_LGUI,    KC_LALT,                            KC_SPC,                             MO(2),      KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
+    TT(1),      KC_LGUI,    KC_LALT,                            KC_SPC,                             MO2_LNG,    KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
     ),
     [1] = LAYOUT_65_ansi_blocker(
-    _______,    KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     _______,    RM_TOGG,
+    PSCR,       KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     DEL_WRD,    RM_TOGG,
     _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,
-    CW_TOGG,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,                _______,    _______,
+    CW_TOGG,    _______,    _______,    _______,    _______,    _______,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RIGHT,   _______,    _______,                _______,    _______,
     _______,    _______,    _______,    RCS(KC_C),  RCS(KC_V),  _______,    _______,    _______,    _______,    _______,    _______,    _______,                _______,    _______,
     _______,    _______,    _______,                            _______,                            _______,    _______,                            _______,    _______,    _______
     ),
     [2] = LAYOUT_65_ansi_blocker(
     QK_BOOT,    KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     _______,    _______,
-    _______,    KC_BLE1,    KC_BLE2,    KC_BLE3,    KC_24G,     KC_USB,    _______,     _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,
+    _______,    KC_BLE1,    KC_BLE2,    KC_BLE3,    KC_24G,     KC_USB,    _______,     _______,    _______,    OS_CHG,     _______,    _______,    _______,    _______,    _______,
     KC_CAPS,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,                _______,    _______,
     _______,    _______,    _______,    _______,    _______,    QK_REBOOT,  _______,    _______,    _______,    _______,    _______,    _______,                MS_UP,      _______,
     _______,    _______,    _______,                            _______,                            _______,    _______,                            MS_LEFT,    MS_DOWN,    MS_RGHT
