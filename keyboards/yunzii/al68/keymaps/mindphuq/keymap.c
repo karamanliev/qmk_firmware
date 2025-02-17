@@ -14,8 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "raw_hid.h"
 
 #define CTL_ESC CTL_T(KC_ESC)
+#define ALT_LNG ALT_T(KC_LNG1)
 #define MO2_LNG LT(2, KC_LNG1)
 
 #define LED_CAPS 25
@@ -33,10 +35,35 @@ enum user_keycodes {
     OS_CHG = SAFE_RANGE,
     PSCR,
     DEL_WRD,
-    OSL_MEH //  TODO: make it one shot layer 1 on tap and MEH (or HYPR) on hold
 };
 
 bool is_macos_mode = false;
+
+#ifdef RAW_ENABLE
+void raw_hid_receive(uint8_t *data, uint8_t length) {
+    if (length < 1) return;  // Ignore empty messages
+
+    switch (data[0]) {
+        case 0x01:
+            rgb_matrix_enable_noeeprom();
+            // rgb_matrix_sethsv_noeeprom(50, 100, 120);
+            rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_bg_na_3_moreta_rgb_effect);
+            break;
+        case 0x02:
+            rgb_matrix_enable_noeeprom();
+            rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+            rgb_matrix_sethsv_noeeprom(191, 200, 120);
+            break;
+        case 0x03:
+            rgb_matrix_disable_noeeprom();
+            break;
+        default:
+            // Echo back if it's an unknown command
+            raw_hid_send(data, length);
+            break;
+    }
+}
+#endif
 
 // Call the post init code.
 void keyboard_post_init_user(void) {
@@ -66,9 +93,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             tap_code16(keycode);
             tap_code(KC_BSPC);
             return false;
-
-        case OSL_MEH:
-            // tap_code16()
     }
     return true;
 };
@@ -118,7 +142,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,     KC_Q,       KC_W,       KC_E,       KC_R,       KC_T,       KC_Y,       KC_U,       KC_I,       KC_O,       KC_P,       KC_LBRC,    KC_RBRC,    KC_BSLS,    KC_DELETE,
     CTL_ESC,    KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,                KC_ENT,     KC_PAGE_UP,
     KC_LSFT,    KC_Z,       KC_X,       KC_C,       KC_V,       KC_B,       KC_N,       KC_M,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_RSFT,                KC_UP,      KC_PAGE_DOWN,
-    TT(1),      KC_LGUI,    KC_LALT,                            KC_SPC,                             MO2_LNG,    KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
+    TT(1),      KC_LGUI,    ALT_LNG,                            KC_SPC,                             MO2_LNG,    KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
     ),
     [1] = LAYOUT_65_ansi_blocker(
     PSCR,       KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     DEL_WRD,    RM_TOGG,
