@@ -12,7 +12,7 @@ void keyboard_pre_init_kb(void) {
     gpio_set_pin_output(A8);
     gpio_write_pin_high(A8); // ENABLE USB
     uart_init(460800);
-    wait_ms(400);
+    wait_ms(600);
 }
 
 bool process_record_kb(uint16_t keycode, keyrecord_t* record) {
