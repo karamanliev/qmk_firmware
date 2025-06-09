@@ -26,6 +26,7 @@
 #define LED_1 55
 #define LED_2 56
 #define LED_3 57
+#define HSV_CYBER 191, 200, 120
 
 #define LIN_PSCR LGUI(S(KC_S))
 #define MAC_PSCR LGUI(S(KC_4))
@@ -48,13 +49,11 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
     switch (data[0]) {
         case 0x01:
             rgb_matrix_enable_noeeprom();
-            // rgb_matrix_sethsv_noeeprom(50, 100, 120);
-            rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_bg_na_3_moreta_rgb_effect);
+            rgb_matrix_sethsv_noeeprom(HSV_CYAN);
             break;
         case 0x02:
             rgb_matrix_enable_noeeprom();
-            rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
-            rgb_matrix_sethsv_noeeprom(191, 200, 120);
+            rgb_matrix_sethsv_noeeprom(HSV_CYBER);
             break;
         case 0x03:
             rgb_matrix_disable_noeeprom();
@@ -70,7 +69,7 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
 // Call the post init code.
 void keyboard_post_init_user(void) {
     rgb_matrix_enable_noeeprom();
-    rgb_matrix_sethsv_noeeprom(191, 200, 120);
+    rgb_matrix_sethsv_noeeprom(HSV_CYBER);
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
 }
 
