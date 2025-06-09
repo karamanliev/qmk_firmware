@@ -15,3 +15,4 @@
 #define VIM_A_TEXT_OBJECTS
 #define VIM_G_MOTIONS
 #define VIM_REPLACE
+#define ONESHOT_VIM
