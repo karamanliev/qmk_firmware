@@ -25,3 +25,6 @@
 	path = lib/lvgl
 	url = https://github.com/qmk/lvgl.git
 	branch = release/v8.2
+[submodule "keyboards/yunzii/al68/keymaps/mindphuq/qmk-vim"]
+	path = keyboards/yunzii/al68/keymaps/mindphuq/qmk-vim
+	url = https://github.com/andrewjrae/qmk-vim.git

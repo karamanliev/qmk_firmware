@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "qmk-vim/src/vim.h"
 #include "raw_hid.h"
 
 #define CTL_ESC CTL_T(KC_ESC)
@@ -33,6 +34,7 @@
 
 enum user_keycodes {
     OS_CHG = SAFE_RANGE,
+    TOG_VIM,
     PSCR,
     DEL_WRD,
 };
@@ -74,6 +76,12 @@ void keyboard_post_init_user(void) {
 
 // Custom keycodes setup
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Process case modes
+    if (!process_vim_mode(keycode, record)) {
+        return false;
+    }
+
+    // Regular user keycode case statement
     if (!record->event.pressed) {
         return true;
     }
@@ -81,12 +89,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case OS_CHG:
             is_macos_mode = !is_macos_mode;
-            break;
+
+        case TOG_VIM:
+            if (record->event.pressed) {
+                toggle_vim_mode();
+            }
+            return false;
 
         case PSCR:
             keycode = is_macos_mode ? MAC_PSCR : LIN_PSCR;
             tap_code16(keycode);
-            break;
 
         case DEL_WRD:
             keycode = is_macos_mode ? MAC_SEL_WRD : LIN_SEL_WRD;
@@ -114,7 +126,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     // Add indicator if caps_lock or caps_word is on
-    if (host_keyboard_led_state().caps_lock || is_caps_word_on()) {
+    if (host_keyboard_led_state().caps_lock || is_caps_word_on() || vim_mode_enabled()) {
         RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 255, 0, 0);
     } else {
         RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 0, 0, 0);
@@ -147,7 +159,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [1] = LAYOUT_65_ansi_blocker(
     PSCR,       KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     DEL_WRD,    RM_TOGG,
     _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,
-    CW_TOGG,    _______,    _______,    _______,    _______,    _______,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RIGHT,   _______,    _______,                _______,    _______,
+    TOG_VIM,    _______,    _______,    _______,    _______,    _______,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RIGHT,   _______,    _______,                _______,    _______,
     _______,    _______,    _______,    RCS(KC_C),  RCS(KC_V),  _______,    _______,    _______,    _______,    _______,    _______,    _______,                _______,    _______,
     _______,    _______,    _______,                            _______,                            _______,    _______,                            _______,    _______,    _______
     ),

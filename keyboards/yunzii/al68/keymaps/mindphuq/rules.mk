@@ -1,3 +1,4 @@
+include $(KEYBOARD_PATH_1)/keymaps/$(KEYMAP)/qmk-vim/rules.mk
 ENCODER_MAP_ENABLE = yes
 CAPS_WORD_ENABLE = yes
 RAW_ENABLE = yes
