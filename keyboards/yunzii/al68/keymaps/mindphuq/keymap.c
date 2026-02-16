@@ -112,10 +112,16 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     // Add indicator if caps_lock or caps_word is on
-    if (host_keyboard_led_state().caps_lock || is_caps_word_on() || vim_mode_enabled()) {
+    if (host_keyboard_led_state().caps_lock || is_caps_word_on()) {
         RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 255, 0, 0);
     } else {
         RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 0, 0, 0);
+    }
+
+    if (vim_mode_enabled()) {
+        for (uint8_t i = 25; i <= 38; i++) { // home row?
+            rgb_matrix_set_color(i, 0, 255, 0);
+        }
     }
 
     if (is_macos_mode) {
