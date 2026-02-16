@@ -26,11 +26,12 @@ void vim_layer_finished(tap_dance_state_t *state, void *user_data) {
     td_vim_state = cur_dance(state);
     switch (td_vim_state) {
         case TD_SINGLE_TAP:
-            if (vim_mode_enabled()) {
-                toggle_vim_mode();
-            } else {
-                start_oneshot_vim();
-            }
+            // if (vim_mode_enabled()) {
+            //     toggle_vim_mode();
+            // } else {
+            //     start_oneshot_vim();
+            // }
+            toggle_vim_mode();
             break;
         case TD_SINGLE_HOLD:
             layer_on(2);
