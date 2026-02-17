@@ -3,7 +3,7 @@
 #include "raw_hid.h"
 #include "tap_dance.c"
 
-#define CTL_ESC CTL_T(KC_ESC)
+#define CTL_ESC LCTL_T(KC_ESC)
 #define ALT_LNG ALT_T(KC_LNG1)
 #define MO2_LNG LT(2, KC_LNG1)
 
@@ -70,6 +70,38 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // Regular user keycode case statement
     if (!record->event.pressed) {
         return true;
+    }
+
+        // Auto-HYPR layer 1 keys
+    if (IS_LAYER_ON(1)) {
+        // Exclude specific keycodes
+        switch (keycode) {
+            case RCS(KC_C):
+            case RCS(KC_V):
+            case TOG_VIM:
+            case KC_F1 ... KC_F12:
+            case KC_LNG1:
+            case KC_LEFT:
+            case KC_DOWN:
+            case KC_UP:
+            case KC_RIGHT:
+            case DEL_WRD:
+            case RM_TOGG:
+            case DT_UP:
+            case DT_DOWN:
+            case DT_PRNT:
+            case KC_TRNS:  // Don't wrap transparent keys
+            case MO(1):    // Don't wrap layer keys
+            case MO(2):
+                break;
+            default:
+                // Wrap everything else in HYPR
+                if (keycode >= KC_A && keycode <= KC_Z) {
+                    tap_code16(HYPR(keycode));
+                    return false;
+                }
+                break;
+        }
     }
 
     switch (keycode) {
@@ -146,15 +178,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,     KC_Q,       KC_W,       KC_E,       KC_R,       KC_T,       KC_Y,       KC_U,       KC_I,       KC_O,       KC_P,       KC_LBRC,    KC_RBRC,    KC_BSLS,    KC_DELETE,
     CTL_ESC,    KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,                KC_ENT,     KC_PAGE_UP,
     KC_LSFT,    KC_Z,       KC_X,       KC_C,       KC_V,       KC_B,       KC_N,       KC_M,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_RSFT,                KC_UP,      KC_PAGE_DOWN,
-    MO(1),      KC_LGUI,    ALT_LNG,                            KC_SPC,                             VIM_MO2,    KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
+    MO(1),      KC_LGUI,    KC_LALT,                            KC_SPC,                             VIM_MO2,    KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
     ),
+
     [1] = LAYOUT_65_ansi_blocker(
-    PSCR,       KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     DEL_WRD,    RM_TOGG,
+    _______,    KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     DEL_WRD,    RM_TOGG,
     _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,
     TOG_VIM,    _______,    _______,    _______,    _______,    _______,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RIGHT,   _______,    _______,                _______,    _______,
-    _______,    _______,    _______,    RCS(KC_C),  RCS(KC_V),  _______,    _______,    _______,    _______,    _______,    _______,    _______,                DT_UP,      _______,
+    KC_LNG1,    _______,    _______,    RCS(KC_C),  RCS(KC_V),  _______,    _______,    _______,    _______,    _______,    _______,    _______,                DT_UP,      _______,
     _______,    _______,    _______,                            _______,                            _______,    _______,                            _______,    DT_DOWN,    DT_PRNT
     ),
+
     [2] = LAYOUT_65_ansi_blocker(
     QK_BOOT,    KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     _______,    _______,
     _______,    KC_BLE1,    KC_BLE2,    KC_BLE3,    KC_24G,     KC_USB,    _______,     _______,    _______,    OS_CHG,     _______,    _______,    _______,    _______,    _______,
