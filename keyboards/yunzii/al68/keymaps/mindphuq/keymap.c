@@ -4,30 +4,20 @@
 #include "tap_dance.c"
 
 #define CTL_ESC LCTL_T(KC_ESC)
-#define ALT_LNG ALT_T(KC_LNG1)
-#define MO2_LNG LT(2, KC_LNG1)
 
 #define LED_CAPS 25
-#define LED_OS 44
 #define LED_1 55
 #define LED_2 56
 #define LED_3 57
 #define HSV_CYBER 191, 200, 120
 
-#define LIN_PSCR LGUI(S(KC_S))
-#define MAC_PSCR LGUI(S(KC_4))
 #define LIN_SEL_WRD C(S(KC_LEFT))
-#define MAC_SEL_WRD A(S(KC_LEFT))
 #define VIM_MO2 TD(TD_VIM_LAYER)
 
 enum user_keycodes {
-    OS_CHG = SAFE_RANGE,
-    TOG_VIM,
-    PSCR,
+    TOG_VIM = SAFE_RANGE,
     DEL_WRD,
 };
-
-bool is_macos_mode = false;
 
 #ifdef RAW_ENABLE
 void raw_hid_receive(uint8_t *data, uint8_t length) {
@@ -105,22 +95,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
-        case OS_CHG:
-            is_macos_mode = !is_macos_mode;
-
         case TOG_VIM:
             if (record->event.pressed) {
                 toggle_vim_mode();
             }
             return false;
 
-        case PSCR:
-            keycode = is_macos_mode ? MAC_PSCR : LIN_PSCR;
-            tap_code16(keycode);
-
         case DEL_WRD:
-            keycode = is_macos_mode ? MAC_SEL_WRD : LIN_SEL_WRD;
-            tap_code16(keycode);
+            tap_code16(LIN_SEL_WRD);
             tap_code(KC_BSPC);
             return false;
     }
@@ -156,11 +138,6 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         }
     }
 
-    if (is_macos_mode) {
-        rgb_matrix_set_color(LED_OS, 255, 0, 0);
-    } else {
-        rgb_matrix_set_color(LED_OS, 0, 0, 0);
-    }
     return false;
 }
 
@@ -191,7 +168,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [2] = LAYOUT_65_ansi_blocker(
     QK_BOOT,    KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     _______,    _______,
-    _______,    KC_BLE1,    KC_BLE2,    KC_BLE3,    KC_24G,     KC_USB,    _______,     _______,    _______,    OS_CHG,     _______,    _______,    _______,    _______,    _______,
+    _______,    KC_BLE1,    KC_BLE2,    KC_BLE3,    KC_24G,     KC_USB,    _______,     _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,
     KC_CAPS,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,                MS_BTN3,    _______,
     _______,    _______,    _______,    _______,    _______,    QK_REBOOT,  _______,    _______,    _______,    _______,    _______,    MS_BTN1,                MS_UP,      MS_BTN2,
     _______,    _______,    _______,                            _______,                            _______,    KC_RALT,                            MS_LEFT,    MS_DOWN,    MS_RGHT
