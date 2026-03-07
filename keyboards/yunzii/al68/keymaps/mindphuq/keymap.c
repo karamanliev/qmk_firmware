@@ -3,7 +3,7 @@
 #include "raw_hid.h"
 #include "tap_dance.c"
 
-#define CTL_ESC LCTL_T(KC_ESC)
+#define CTL_ESC RCTL_T(KC_ESC)
 
 #define LED_CAPS 25
 #define LED_1 55
