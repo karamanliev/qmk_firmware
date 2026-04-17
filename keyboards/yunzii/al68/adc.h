@@ -14,6 +14,8 @@
 #define BATT_85  3980
 #define BATT_99  4150
 
+extern uint16_t battery_value;
+
 void     battery_adc_init(void);
 uint16_t get_adc_value(void);
 uint16_t get_adc_vref(void);

@@ -136,10 +136,5 @@ uint8_t batt_level(void) {
         level = 0;
     }
 
-    // USB powered with low ADC reading means fully charged (no battery drain)
-    if (battery_value < 1000) {
-        level = 100;
-    }
-
     return level;
 }

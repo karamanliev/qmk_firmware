@@ -97,11 +97,15 @@ static void get_mode(void) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 static void battery_update(void) {
-    extern uint16_t battery_value;
     uint16_t adc_val = get_adc_value();
     uint16_t adc_vref = get_adc_vref();
     battery_value = (adc_val * 1764) / adc_vref;
     battery_level_pct = batt_level();
+
+    // USB plugged in with very low ADC → no battery installed, report 100%
+    if (gpio_read_pin(PLUG_IN_PIN) && battery_value < 1000) {
+        battery_level_pct = 100;
+    }
 
     // Smooth: limit change to ±1% per check interval
     if (!battery_initialized) {
@@ -412,9 +416,9 @@ void housekeeping_task_kb(void) {
     // ── Periodic debug heartbeat ──
     if (timer_elapsed32(debug_timer) > DEBUG_INTERVAL_MS) {
         debug_timer = timer_read32();
-        uprintf("DBG: m=%u c=%u batt=%u%% idle=%lus ka=%u slp=%u plug=%u\n",
+        uprintf("DBG: m=%u c=%u batt=%u%% bv=%u idle=%lus ka=%u slp=%u plug=%u\n",
                 kb_mode, wireless_connected, battery_level_smooth,
-                timer_elapsed32(idle_timer) / 1000,
+                battery_value, timer_elapsed32(idle_timer) / 1000,
                 keepalive_count, sleep_first_flag,
                 (unsigned)gpio_read_pin(PLUG_IN_PIN));
     }
