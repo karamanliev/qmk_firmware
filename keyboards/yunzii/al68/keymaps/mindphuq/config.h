@@ -1,7 +1,7 @@
 #pragma once
 
-#define RETRO_TAPPING
-#define TAPPING_TERM 130
+// #define RETRO_TAPPING
+#define TAPPING_TERM 200
 #define PERMISSIVE_HOLD
 
 #define RGB_MATRIX_SLEEP
