@@ -1,7 +1,5 @@
 #include QMK_KEYBOARD_H
-#include "qmk-vim/src/vim.h"
 #include "raw_hid.h"
-#include "tap_dance.c"
 
 #define CTL_ESC RCTL_T(KC_ESC)
 
@@ -12,11 +10,9 @@
 #define HSV_CYBER 191, 200, 120
 
 #define LIN_SEL_WRD C(S(KC_LEFT))
-#define VIM_MO2 TD(TD_VIM_LAYER)
 
 enum user_keycodes {
-    TOG_VIM = SAFE_RANGE,
-    DEL_WRD,
+    DEL_WRD = SAFE_RANGE,
 };
 
 #ifdef RAW_ENABLE
@@ -52,11 +48,6 @@ void keyboard_post_init_user(void) {
 
 // Custom keycodes setup
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    // Process case modes
-    if (!process_vim_mode(keycode, record)) {
-        return false;
-    }
-
     // Regular user keycode case statement
     if (!record->event.pressed) {
         return true;
@@ -68,7 +59,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         switch (keycode) {
             case RCS(KC_C):
             case RCS(KC_V):
-            case TOG_VIM:
             case KC_F1 ... KC_F12:
             case KC_LNG1:
             case KC_LEFT:
@@ -95,12 +85,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
-        case TOG_VIM:
-            if (record->event.pressed) {
-                toggle_vim_mode();
-            }
-            return false;
-
         case DEL_WRD:
             tap_code16(LIN_SEL_WRD);
             tap_code(KC_BSPC);
@@ -132,12 +116,6 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         RGB_MATRIX_INDICATOR_SET_COLOR(LED_CAPS, 0, 0, 0);
     }
 
-    if (vim_mode_enabled()) {
-        for (uint8_t i = 25; i <= 38; i++) { // home row?
-            rgb_matrix_set_color(i, 0, 255, 0);
-        }
-    }
-
     return false;
 }
 
@@ -155,13 +133,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TAB,     KC_Q,       KC_W,       KC_E,       KC_R,       KC_T,       KC_Y,       KC_U,       KC_I,       KC_O,       KC_P,       KC_LBRC,    KC_RBRC,    KC_BSLS,    KC_DELETE,
     CTL_ESC,    KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,                KC_ENT,     KC_PAGE_UP,
     KC_LSFT,    KC_Z,       KC_X,       KC_C,       KC_V,       KC_B,       KC_N,       KC_M,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_RSFT,                KC_UP,      KC_PAGE_DOWN,
-    MO(1),      KC_LGUI,    KC_LALT,                            KC_SPC,                             VIM_MO2,    KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
+    MO(1),      KC_LGUI,    KC_LALT,                            KC_SPC,                             MO(2),      KC_RCTL,                            KC_LEFT,    KC_DOWN,    KC_RIGHT
     ),
 
     [1] = LAYOUT_65_ansi_blocker(
     _______,    KC_F1,      KC_F2,      KC_F3,      KC_F4,      KC_F5,      KC_F6,      KC_F7,      KC_F8,      KC_F9,      KC_F10,     KC_F11,     KC_F12,     DEL_WRD,    RM_TOGG,
     _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,    _______,
-    TOG_VIM,    _______,    _______,    _______,    _______,    _______,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RIGHT,   _______,    _______,                _______,    _______,
+    KC_NO,      _______,    _______,    _______,    _______,    _______,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RIGHT,   _______,    _______,                _______,    _______,
     KC_LNG1,    _______,    _______,    RCS(KC_C),  RCS(KC_V),  _______,    _______,    _______,    _______,    _______,    _______,    _______,                DT_UP,      _______,
     _______,    _______,    _______,                            _______,                            _______,    _______,                            _______,    DT_DOWN,    DT_PRNT
     ),

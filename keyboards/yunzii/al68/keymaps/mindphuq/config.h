@@ -2,6 +2,7 @@
 
 // #define RETRO_TAPPING
 #define TAPPING_TERM 200
+#define QUICK_TAP_TERM 0
 #define PERMISSIVE_HOLD
 
 #define RGB_MATRIX_SLEEP
@@ -10,10 +11,3 @@
 
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 #define CAPS_WORD_IDLE_TIMEOUT 5000  // 5 seconds.
-
-#define BETTER_VISUAL_MODE
-#define VIM_I_TEXT_OBJECTS
-#define VIM_A_TEXT_OBJECTS
-#define VIM_G_MOTIONS
-#define VIM_REPLACE
-#define ONESHOT_VIM
